@@ -2,15 +2,17 @@ package com.microservices.user.service.UserService.serviceImpl;
 
 import com.microservices.user.service.UserService.entities.User;
 import com.microservices.user.service.UserService.repositories.UserRepository;
-import com.microservices.user.service.UserService.service.UserService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class UserServiceImplTest
 {
-    @Autowired
+    @Mock
     private UserRepository userRepository;
 
     @Test
@@ -22,8 +24,7 @@ class UserServiceImplTest
     //    user.getEmail("manjeet@kumar.com");
         user.setGender("male");
         userRepository.save(user);
-    //    User testUser = userRepository.findBy(user.getId());
-    //    assertTrue();
+        verify(userRepository).save(user);
     }
 
     @Test

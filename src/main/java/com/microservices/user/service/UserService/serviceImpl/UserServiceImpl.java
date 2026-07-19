@@ -1,12 +1,14 @@
 package com.microservices.user.service.UserService.serviceImpl;
 
 import com.microservices.user.service.UserService.entities.User;
+import com.microservices.user.service.UserService.events.UserCreatedEvent;
 import com.microservices.user.service.UserService.exceptions.ResourceNotFoundException;
 import com.microservices.user.service.UserService.repositories.UserRepository;
 import com.microservices.user.service.UserService.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,13 +19,22 @@ public class UserServiceImpl implements UserService
 
     Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
+    private static final String TOPIC = "user-created";
+
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    KafkaTemplate<String, UserCreatedEvent> kafkaTemplate;
 
     @Override
     public User save(User user)
     {
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        UserCreatedEvent event = new UserCreatedEvent(savedUser.getId(), savedUser.getEmail(), savedUser.getName());
+        kafkaTemplate.send(TOPIC, event);
+        logger.info("UserCreatedEvent published for userId: {}", savedUser.getId());
+        return savedUser;
     }
 
     @Override
